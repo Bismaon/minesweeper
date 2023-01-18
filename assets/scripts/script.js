@@ -473,7 +473,7 @@ function reset(specific, desired) {
   tempHeight=Number.parseInt(document.querySelector("#height").value);
   tempWidth=Number.parseInt(document.querySelector("#width").value);
   tempMineNb=Number.parseInt(document.querySelector("#mines").value)
-  erreur=tempWidth<2 ||tempHeight<2||tempMineNb>((tempHeight*tempWidth)-9)
+  erreur=tempWidth<4 ||tempHeight<4||tempMineNb>((tempHeight*tempWidth)-9)||tempMineNb<1
   if (erreur){
     warning();
     return;
@@ -521,7 +521,6 @@ function reset(specific, desired) {
 	hour = 0;
 	minute = 0;
 	second = 0;
-  document.getElementById("quantity").innerHTML=nbOfMines.toString();
 	document.getElementById('hr').innerHTML = "00";
 	document.getElementById('min').innerHTML = "00";
 	document.getElementById('sec').innerHTML = "00";
@@ -529,12 +528,15 @@ function reset(specific, desired) {
     height = Number.parseInt(document.querySelector("#height").value);
     width=Number.parseInt(document.querySelector("#width").value);
     nbOfMines=Number.parseInt(document.querySelector("#mines").value);
+    document.getElementById("quantity").innerHTML=nbOfMines.toString();
+    selected=null;
     setEmptyMinefield();
   }
   else{
     document.querySelector("#height").value=desired[1];
     document.querySelector("#width").value=desired[2];
     document.querySelector("#mines").value=desired[3];
+    document.getElementById("quantity").innerHTML=desired[3].toString();
     table=document.querySelector("#minefield")
     table.innerHTML=""
     table.innerHTML=desired[0];
@@ -590,6 +592,8 @@ hour = 00;
 minute = 00;
 second = 00;
 count = 00;
+selected=null;
+
 //prewritten specific grids
 beginner='<tbody><tr id="line0"><td onmousedown="clic(0,0,event)" id="tile0_0"><img src="./assets/img/blank.png"></td><td onmousedown="clic(0,1,event)" id="tile0_1"><img src="./assets/img/blank.png"></td><td onmousedown="clic(0,2,event)" id="tile0_2"><img src="./assets/img/blank.png"></td><td onmousedown="clic(0,3,event)" id="tile0_3"><img src="./assets/img/blank.png"></td><td onmousedown="clic(0,4,event)" id="tile0_4"><img src="./assets/img/blank.png"></td><td onmousedown="clic(0,5,event)" id="tile0_5"><img src="./assets/img/blank.png"></td><td onmousedown="clic(0,6,event)" id="tile0_6"><img src="./assets/img/blank.png"></td><td onmousedown="clic(0,7,event)" id="tile0_7"><img src="./assets/img/blank.png"></td></tr></tbody><tbody><tr id="line1"><td onmousedown="clic(1,0,event)" id="tile1_0"><img src="./assets/img/blank.png"></td><td onmousedown="clic(1,1,event)" id="tile1_1"><img src="./assets/img/blank.png"></td><td onmousedown="clic(1,2,event)" id="tile1_2"><img src="./assets/img/blank.png"></td><td onmousedown="clic(1,3,event)" id="tile1_3"><img src="./assets/img/blank.png"></td><td onmousedown="clic(1,4,event)" id="tile1_4"><img src="./assets/img/blank.png"></td><td onmousedown="clic(1,5,event)" id="tile1_5"><img src="./assets/img/blank.png"></td><td onmousedown="clic(1,6,event)" id="tile1_6"><img src="./assets/img/blank.png"></td><td onmousedown="clic(1,7,event)" id="tile1_7"><img src="./assets/img/blank.png"></td></tr></tbody><tbody><tr id="line2"><td onmousedown="clic(2,0,event)" id="tile2_0"><img src="./assets/img/blank.png"></td><td onmousedown="clic(2,1,event)" id="tile2_1"><img src="./assets/img/blank.png"></td><td onmousedown="clic(2,2,event)" id="tile2_2"><img src="./assets/img/blank.png"></td><td onmousedown="clic(2,3,event)" id="tile2_3"><img src="./assets/img/blank.png"></td><td onmousedown="clic(2,4,event)" id="tile2_4"><img src="./assets/img/blank.png"></td><td onmousedown="clic(2,5,event)" id="tile2_5"><img src="./assets/img/blank.png"></td><td onmousedown="clic(2,6,event)" id="tile2_6"><img src="./assets/img/blank.png"></td><td onmousedown="clic(2,7,event)" id="tile2_7"><img src="./assets/img/blank.png"></td></tr></tbody><tbody><tr id="line3"><td onmousedown="clic(3,0,event)" id="tile3_0"><img src="./assets/img/blank.png"></td><td onmousedown="clic(3,1,event)" id="tile3_1"><img src="./assets/img/blank.png"></td><td onmousedown="clic(3,2,event)" id="tile3_2"><img src="./assets/img/blank.png"></td><td onmousedown="clic(3,3,event)" id="tile3_3"><img src="./assets/img/blank.png"></td><td onmousedown="clic(3,4,event)" id="tile3_4"><img src="./assets/img/blank.png"></td><td onmousedown="clic(3,5,event)" id="tile3_5"><img src="./assets/img/blank.png"></td><td onmousedown="clic(3,6,event)" id="tile3_6"><img src="./assets/img/blank.png"></td><td onmousedown="clic(3,7,event)" id="tile3_7"><img src="./assets/img/blank.png"></td></tr></tbody><tbody><tr id="line4"><td onmousedown="clic(4,0,event)" id="tile4_0"><img src="./assets/img/blank.png"></td><td onmousedown="clic(4,1,event)" id="tile4_1"><img src="./assets/img/blank.png"></td><td onmousedown="clic(4,2,event)" id="tile4_2"><img src="./assets/img/blank.png"></td><td onmousedown="clic(4,3,event)" id="tile4_3"><img src="./assets/img/blank.png"></td><td onmousedown="clic(4,4,event)" id="tile4_4"><img src="./assets/img/blank.png"></td><td onmousedown="clic(4,5,event)" id="tile4_5"><img src="./assets/img/blank.png"></td><td onmousedown="clic(4,6,event)" id="tile4_6"><img src="./assets/img/blank.png"></td><td onmousedown="clic(4,7,event)" id="tile4_7"><img src="./assets/img/blank.png"></td></tr></tbody><tbody><tr id="line5"><td onmousedown="clic(5,0,event)" id="tile5_0"><img src="./assets/img/blank.png"></td><td onmousedown="clic(5,1,event)" id="tile5_1"><img src="./assets/img/blank.png"></td><td onmousedown="clic(5,2,event)" id="tile5_2"><img src="./assets/img/blank.png"></td><td onmousedown="clic(5,3,event)" id="tile5_3"><img src="./assets/img/blank.png"></td><td onmousedown="clic(5,4,event)" id="tile5_4"><img src="./assets/img/blank.png"></td><td onmousedown="clic(5,5,event)" id="tile5_5"><img src="./assets/img/blank.png"></td><td onmousedown="clic(5,6,event)" id="tile5_6"><img src="./assets/img/blank.png"></td><td onmousedown="clic(5,7,event)" id="tile5_7"><img src="./assets/img/blank.png"></td></tr></tbody><tbody><tr id="line6"><td onmousedown="clic(6,0,event)" id="tile6_0"><img src="./assets/img/blank.png"></td><td onmousedown="clic(6,1,event)" id="tile6_1"><img src="./assets/img/blank.png"></td><td onmousedown="clic(6,2,event)" id="tile6_2"><img src="./assets/img/blank.png"></td><td onmousedown="clic(6,3,event)" id="tile6_3"><img src="./assets/img/blank.png"></td><td onmousedown="clic(6,4,event)" id="tile6_4"><img src="./assets/img/blank.png"></td><td onmousedown="clic(6,5,event)" id="tile6_5"><img src="./assets/img/blank.png"></td><td onmousedown="clic(6,6,event)" id="tile6_6"><img src="./assets/img/blank.png"></td><td onmousedown="clic(6,7,event)" id="tile6_7"><img src="./assets/img/blank.png"></td></tr></tbody><tbody><tr id="line7"><td onmousedown="clic(7,0,event)" id="tile7_0"><img src="./assets/img/blank.png"></td><td onmousedown="clic(7,1,event)" id="tile7_1"><img src="./assets/img/blank.png"></td><td onmousedown="clic(7,2,event)" id="tile7_2"><img src="./assets/img/blank.png"></td><td onmousedown="clic(7,3,event)" id="tile7_3"><img src="./assets/img/blank.png"></td><td onmousedown="clic(7,4,event)" id="tile7_4"><img src="./assets/img/blank.png"></td><td onmousedown="clic(7,5,event)" id="tile7_5"><img src="./assets/img/blank.png"></td><td onmousedown="clic(7,6,event)" id="tile7_6"><img src="./assets/img/blank.png"></td><td onmousedown="clic(7,7,event)" id="tile7_7"><img src="./assets/img/blank.png"></td></tr></tbody>'
 
