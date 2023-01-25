@@ -40,6 +40,9 @@
 			<span class="txt">Sec</span>
 		</div>
 	</div>
+	<div id="myProgress">
+		<div id="myBar">0%</div>
+	  </div>
 	<table oncontextmenu="return false;" id="minefield">
 	</table>
 	<br>
@@ -49,7 +52,7 @@
 	<button id="beginner" class="toggler" onclick="specificGrid(8,8,10, beginner)">Débutant</button>
 	<button id="intermediate" class="toggler" onclick="specificGrid(16,16,40, intermediate)">Intermédiaire</button>
 	<button id="expert" class="toggler" onclick="specificGrid(16,30,99, expert)">Expert</button>
-	<button id="custom">Personnaliser</button>
+	<button id="custom" onclick="setSpecificToNull()">Personnaliser</button>
 	<div id="customSettings">
 		<br>
 		<label for="height">Entrez la hauteur du champ de mines: </label>

@@ -1,6 +1,10 @@
 var amountList, fail, finished, flagged, height, mineList, nbOfMines, tileList, visited, width, calls, hour, minute, second, count, beginner, intermediate, expert, selected;
 
 window.onload = function(){
+  width=Number.parseInt(document.querySelector("#width").value)
+  height=Number.parseInt(document.querySelector("#height").value)
+  nbOfMines=Number.parseInt(document.querySelector("#mines").value)
+  document.getElementById("quantity").innerHTML=nbOfMines.toString();
   init()
 }
 
@@ -69,6 +73,7 @@ function clic(row, column, event) {
     setAmountList();
     // shows the cell on which the player has clicked and nearby cells
     showTile(row, column);
+    progress();
 
   }
   //checks if the player has failed if so a message is shown saying "Perdu!"
@@ -86,6 +91,7 @@ function clic(row, column, event) {
     //else it shows the tile that the player has clicked on
     else {
       showTile(row, column);
+      progress();
     }
 
     //if the player has not clicked on a mine it checks if the player has
@@ -96,6 +102,7 @@ function clic(row, column, event) {
         timer=false
         displayAll();
         alert("Gagn\u00e9!");
+        progress();
       }
     }
     //if the player has clicked on a mine it shows a message saying
@@ -446,7 +453,9 @@ function displayAll() {
 
 function specificGrid(row, column, mines, desiredTable){
   var desired;
-  
+  if (fail||finished){
+    setHighScore();
+  }
   height=row;
   width=column;
   nbOfMines=mines;
@@ -457,7 +466,7 @@ function specificGrid(row, column, mines, desiredTable){
   }  else{
     selected="expert";
   }
-  desired=[desiredTable, height, width, mines]
+  desired=[desiredTable, height, width, nbOfMines]
   reset(true, desired);
 }
 
@@ -468,12 +477,60 @@ function warning(){
 // resets the board, change the minefield size and amount of mines based on the
 // user's settings, as well as sets the highscores.
 function reset(specific, desired) {
-  var table, classement, classementHTML, type, result, classementTitle, tempHeight, tempWidth, tempMineNb;
+  var table;
+  setProgressToZero();
+  if ((fail||finished) && !specific){
+    setHighScore();
+  }
+  mineList.length=0;
+  amountList.length=0;
+  flagged.length=0;
+  visited.length=0;
+  finished = false;
+  fail = false;
+  table = document.querySelector("#minefield");
+  table.innerHTML = "";
+  timer = false;
+	hour = 0;
+	minute = 0;
+	second = 0;
+	document.getElementById('hr').innerHTML = "00";
+	document.getElementById('min').innerHTML = "00";
+	document.getElementById('sec').innerHTML = "00";
+  
+  if (!specific && selected===null){
+    height = Number.parseInt(document.querySelector("#height").value);
+    width=Number.parseInt(document.querySelector("#width").value);
+    nbOfMines=Number.parseInt(document.querySelector("#mines").value);
+    document.getElementById("quantity").innerHTML=nbOfMines.toString();
+    selected=null;
+    showHighScore();
+    setEmptyMinefield();
+  } else if (selected!==null  && !specific){
+    
+    setEmptyMinefield();
 
-  tempHeight=Number.parseInt(document.querySelector("#height").value);
-  tempWidth=Number.parseInt(document.querySelector("#width").value);
-  tempMineNb=Number.parseInt(document.querySelector("#mines").value)
-  erreur=tempWidth<4 ||tempHeight<4||tempMineNb>((tempHeight*tempWidth)-9)||tempMineNb<1
+  } else {
+    document.querySelector("#height").value=desired[1];
+    document.querySelector("#width").value=desired[2];
+    document.querySelector("#mines").value=desired[3];
+    document.getElementById("quantity").innerHTML=desired[3].toString();
+    table=document.querySelector("#minefield")
+    table.innerHTML=""
+    table.innerHTML=desired[0];
+    showHighScore();
+  }
+}
+
+function setSpecificToNull(){
+  selected=null;
+  return;
+}
+
+function setHighScore() {
+  var classement, type, result;
+  erreur=width<4 ||height<4||nbOfMines>((height*width)-9)||nbOfMines<1;
+  type=selected!==null ? selected : height.toString() + "_" + width.toString() + "_" + nbOfMines
   if (erreur){
     warning();
     return;
@@ -494,55 +551,45 @@ function reset(specific, desired) {
       classement[type].pop();
     }
     localStorage.setItem("classement",JSON.stringify(classement));
-
-    classementTitle=document.querySelector("#classement-title");
-    if (!["débutant", "intermédiaire", "expert"].includes(selected)){
-      classementTitle.innerHTML = "Classement pour " + height.toString() + "x" + width.toString() + " " + nbOfMines + " mines";
-    }
-    else{
-      classementTitle.innerHTML = "Classement " + selected;
-    }
-    
-    classementHTML=document.querySelector("#classement");
-    classementHTML.innerHTML="";
-    for (var i=0; i<classement[type].length; i+=1){
-      classementHTML.innerHTML=classementHTML.innerHTML+"<li>"+classement[type][i][0]+"</li>"
-    }
-  }
-  mineList.length=0;
-  amountList.length=0;
-  flagged.length=0;
-  visited.length=0;
-  finished = false;
-  fail = false;
-  table = document.querySelector("#minefield");
-  table.innerHTML = "";
-  timer = false;
-	hour = 0;
-	minute = 0;
-	second = 0;
-	document.getElementById('hr').innerHTML = "00";
-	document.getElementById('min').innerHTML = "00";
-	document.getElementById('sec').innerHTML = "00";
-  if (!specific){
-    height = Number.parseInt(document.querySelector("#height").value);
-    width=Number.parseInt(document.querySelector("#width").value);
-    nbOfMines=Number.parseInt(document.querySelector("#mines").value);
-    document.getElementById("quantity").innerHTML=nbOfMines.toString();
-    selected=null;
-    setEmptyMinefield();
-  }
-  else{
-    document.querySelector("#height").value=desired[1];
-    document.querySelector("#width").value=desired[2];
-    document.querySelector("#mines").value=desired[3];
-    document.getElementById("quantity").innerHTML=desired[3].toString();
-    table=document.querySelector("#minefield")
-    table.innerHTML=""
-    table.innerHTML=desired[0];
+    showHighScore();
   }
 }
 
+function setProgressToZero(){
+  var elem;
+  elem=document.getElementById("myBar");
+  elem.style.width = "0%";
+  elem.innerHTML = "0%";
+}
+function showHighScore(){
+  var classementTitle, classementHTML, classement, type;
+  type=selected!==null ? selected : height.toString() + "_" + width.toString() + "_" + nbOfMines
+  classement=JSON.parse(localStorage.getItem('classement'))||{};
+  classementTitle=document.querySelector("#classement-title");
+  if (!["débutant", "intermédiaire", "expert"].includes(selected)){
+    classementTitle.innerHTML = "Classement pour " + height.toString() + "x" + width.toString() + " " + nbOfMines + " mines";
+  }
+  else{
+    classementTitle.innerHTML = "Classement " + selected;
+  }
+  
+  classementHTML=document.querySelector("#classement");
+  classementHTML.innerHTML="";
+  if (classement[type] === undefined){
+    return;
+  }
+  for (var i=0; i<classement[type].length; i+=1){
+    classementHTML.innerHTML=classementHTML.innerHTML+"<li>"+classement[type][i][0]+"</li>"
+  }
+}
+function progress() {
+  var elem, done;
+  
+  elem=document.getElementById("myBar");
+  done=Math.floor((visited.length/((height*width)-nbOfMines))*100);
+  elem.style.width = done + "%";
+  elem.innerHTML = done + "%";
+}
 //                           global values
 
 //stores the field with 1 given for location of a mine and 0 for a non-mine

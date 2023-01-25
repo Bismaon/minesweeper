@@ -51,3 +51,12 @@ h1 {
 #div-reset{
     text-align: center;
 }
+
+#myBar {
+    width: 0%;
+    height: 30px;
+    background-color: #04AA6D;
+    text-align: center; /* To center it horizontally (if you want) */
+    line-height: 30px; /* To center it vertically */
+    color: white;
+}
