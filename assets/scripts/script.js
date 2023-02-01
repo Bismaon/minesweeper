@@ -1,11 +1,11 @@
 var amountList, fail, finished, flagged, height, mineList, nbOfMines, tileList, visited, width, calls, hour, minute, second, count, beginner, intermediate, expert, selected;
 
 window.onload = function(){
-  width=Number.parseInt(document.querySelector("#width").value)
-  height=Number.parseInt(document.querySelector("#height").value)
-  nbOfMines=Number.parseInt(document.querySelector("#mines").value)
+  width=Number.parseInt(document.querySelector("#width").value);
+  height=Number.parseInt(document.querySelector("#height").value);
+  nbOfMines=Number.parseInt(document.querySelector("#mines").value);
   document.getElementById("quantity").innerHTML=nbOfMines.toString();
-  init()
+  setEmptyMinefield();
 }
 
 function stopWatch() {
@@ -49,11 +49,6 @@ function stopWatch() {
 		document.getElementById('sec').innerHTML = secString;
 		setTimeout(stopWatch, 10);
 	}
-}
-
-function init() {
-  // sets the empty minefield
-  setEmptyMinefield();
 }
 
 //clic takes as parameters two integer, width and height, and a boolean, if
@@ -169,7 +164,7 @@ const mul = (arr, times) => Array.from({length: times*arr.length}, (_,i) => arr[
 //FYShuffle takes as parameters two list of integers, coordinates were mines
 //cannot be put. Shuffles the mines in the list and returns the shuffled list.
 function FYShuffle(rows, columns) {
-  var iColumn, iRow, j, jColumn, jRow, temp, tempMineList;
+  var iRow, iColumn, j, jRow, jColumn, tempMineList;
   tempMineList = mul([1], nbOfMines).concat(mul([0], (width * height - nbOfMines)));
 
   for (var i = tempMineList.length - 1; i > 0; i += -1) {
@@ -283,7 +278,7 @@ function showBlank(row, column) {
 
   //If the tile hasn't been visited it adds its coordinates to visited and
   //checks for other surrounding tiles
-  if (!(find(visited, [row, column])!=-1)) {
+  if ((find(visited, [row, column])===-1)) {
     //Mark the tile visited
     visited.push([row, column]);
 
