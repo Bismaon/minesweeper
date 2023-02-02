@@ -1,4 +1,4 @@
-var amountList, fail, finished, flagged, height, mineList, nbOfMines, tileList, visited, width, calls, hour, minute, second, count, beginner, intermediate, expert, selected;
+var amountList, hasFailed, hasFinished, flagged, height, mineList, nbOfMines, tileList, visited, width, calls, hour, minute, second, count, beginner, intermediate, expert, selected;
 
 window.onload = function(){
   width=Number.parseInt(document.querySelector("#width").value);
@@ -9,7 +9,7 @@ window.onload = function(){
 }
 
 function stopWatch() {
-	if (timer) {
+	if (isTimerOn) {
 		count++;
 
 		if (count == 100) {
@@ -55,12 +55,12 @@ function stopWatch() {
 //the shift key has been pressed or not. It checks which tile has been pressed
 //and reacts accordingly. It returns nothing
 function clic(row, column, event) {
-  if (fail || finished || erreur) {
+  if (hasFailed || hasFinished || hasError) {
     return;
   }
   // checks if it the first tile pressed
   else if (visited.length === 0) {
-    timer = true;
+    isTimerOn = true;
 	  stopWatch();
     // sets the minefield so that no mine is under the first clic
     setMineList([row - 1, row, row + 1], [column - 1, column, column + 1]);
@@ -72,8 +72,8 @@ function clic(row, column, event) {
 
   }
   //checks if the player has failed if so a message is shown saying "Perdu!"
-  else if (fail) {
-    timer = false;
+  else if (hasFailed) {
+    isTimerOn = false;
     alert("Perdu!");
   }
   //if the tile has not been visited
@@ -92,9 +92,9 @@ function clic(row, column, event) {
     //if the player has not clicked on a mine it checks if the player has
     //clicked on all none-mine tile, if so shows all the tiles and a
     //message saying "Gagné!"
-    if (!fail) {
+    if (!hasFailed) {
       if (checkFinish()) {
-        timer=false
+        isTimerOn=false
         displayAll();
         alert("Gagn\u00e9!");
         progress();
@@ -103,7 +103,7 @@ function clic(row, column, event) {
     //if the player has clicked on a mine it shows a message saying
     //"Perdu!" and display all the mines
     else {
-      timer=false
+      isTimerOn=false
       displayMines();
       alert("Perdu!");
     }
@@ -358,13 +358,13 @@ function showTile(row, column) {
     return;
   }
   //if the coordinates of the tile represent one that is a a mine, it
-  //displays the mine to the user and sets the condition of fail as True
+  //displays the mine to the user and sets the condition of hasFailed as True
   else if (mineList[row][column] === 1) {
     visited.push([row, column]);
     //Display it to the user
     tile.innerHTML = tileList[12];
-    //fail condition set to True
-    fail = true;
+    //hasFailed condition set to True
+    hasFailed = true;
     return;
   }
   //if the coordinates of the tile, show a blank tile it calls showBlank with
@@ -418,7 +418,7 @@ function checkFinish() {
     return false;
   }
   //else it checks for all the visited tiles if they cooresponds to non-mine
-  //tiles, if not returns False, else sets finished to True and returns True
+  //tiles, if not returns False, else sets hasFinished to True and returns True
   for (var pair, i = 0; i < visited.length; i += 1) {
     pair = visited[i];
 
@@ -427,8 +427,8 @@ function checkFinish() {
     }
   }
 
-  finished = true;
-  return finished;
+  hasFinished = true;
+  return hasFinished;
 }
 
 //displayAll takes no parameters and changes the HTML code to display all the
@@ -448,7 +448,7 @@ function displayAll() {
 
 function specificGrid(row, column, mines, desiredTable){
   var desired;
-  if (fail||finished){
+  if (hasFailed||hasFinished){
     setHighScore();
   }
   height=row;
@@ -474,18 +474,18 @@ function warning(){
 function reset(specific, desired) {
   var table;
   setProgressToZero();
-  if ((fail||finished) && !specific){
+  if ((hasFailed||hasFinished) && !specific){
     setHighScore();
   }
   mineList.length=0;
   amountList.length=0;
   flagged.length=0;
   visited.length=0;
-  finished = false;
-  fail = false;
+  hasFinished = false;
+  hasFailed = false;
   table = document.querySelector("#minefield");
   table.innerHTML = "";
-  timer = false;
+  isTimerOn = false;
 	hour = 0;
 	minute = 0;
 	second = 0;
@@ -524,13 +524,13 @@ function setSpecificToNull(){
 
 function setHighScore() {
   var classement, type, result;
-  erreur=width<4 ||height<4||nbOfMines>((height*width)-9)||nbOfMines<1;
+  hasError=width<4 ||height<4||nbOfMines>((height*width)-9)||nbOfMines<1;
   type=selected!==null ? selected : height.toString() + "_" + width.toString() + "_" + nbOfMines
-  if (erreur){
+  if (hasError){
     warning();
     return;
   }
-  if (!fail && finished){
+  if (!hasFailed && hasFinished){
     classement=JSON.parse(localStorage.getItem('classement'))||{};
 
     result=[hour+"h"+minute+"m"+second+"s", (hour/360)+(minute/60)+second];
@@ -626,10 +626,10 @@ height = 10;
 //sets the total number of mines on the field as an integer
 nbOfMines = 30;
 
-//fail and finished condition as boolean
-fail = false;
-finished = false;
-erreur = false;
+//hasFailed and hasFinished condition as boolean
+hasFailed = false;
+hasFinished = false;
+hasError = false;
 hour = 00;
 minute = 00;
 second = 00;

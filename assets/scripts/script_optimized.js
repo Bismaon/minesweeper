@@ -1,4 +1,4 @@
-var amountList, fail, finished, flagged, height, mineList, nbOfMines, tileList, visited, width, calls, hour, minute, second, count, beginner, intermediate, expert, selected;
+var amountList, hasFailed, hasFinished, flagged, height, mineList, nbOfMines, tileList, visited, width, calls, hour, minute, second, count, beginner, intermediate, expert, selected;
 
 window.onload = function(){
   width=Number.parseInt(document.querySelector("#width").value);
@@ -9,7 +9,7 @@ window.onload = function(){
 }
 
 function stopWatch() {
-	if (timer) {
+	if (isTimerOn) {
 		count++;
 
 		if (count == 100) {
@@ -55,10 +55,10 @@ function stopWatch() {
 //the shift key has been pressed or not. It checks which tile has been pressed
 //and reacts accordingly. It returns nothing
 function clic(row, column, event) {
-  if (fail || finished || erreur) return;
+  if (hasFailed || hasFinished || hasError) return;
 
   if (visited.length === 0) {
-    timer = true;
+    isTimerOn = true;
     stopWatch();
     setMineList([row - 1, row, row + 1], [column - 1, column, column + 1]);
     setAmountList();
@@ -72,16 +72,16 @@ function clic(row, column, event) {
     showTile(row, column);
     progress();
 
-    if (!fail && checkFinish()) {
-      timer = false;
+    if (!hasFailed && checkFinish()) {
+      isTimerOn = false;
       displayAll();
       alert("Gagn\u00e9!");
       progress();
     }
   }
 
-  if (fail) {
-    timer = false;
+  if (hasFailed) {
+    isTimerOn = false;
     displayMines();
     alert("Perdu!");
   }
@@ -262,7 +262,7 @@ function showTile(row, column) {
   else if (mineList[row][column] === 1) {
     visited.push([row, column]);
     tile.innerHTML = tileList[12];
-    fail = true;
+    hasFailed = true;
   } else if (amount === 0) {
     showBlank(row, column);
   } else {
@@ -299,7 +299,7 @@ function checkFinish() {
   for (var i = 0; i < visited.length; i++) {
     if (mineList[visited[i][0]][visited[i][1]]) return false;
   }
-  finished = true;
+  hasFinished = true;
   return true;
 }
 
@@ -320,7 +320,7 @@ function displayAll() {
 
 function specificGrid(row, column, mines, desiredTable){
   var desired;
-  if (fail||finished){
+  if (hasFailed||hasFinished){
     setHighScore();
   }
   height=row;
@@ -346,18 +346,18 @@ function warning(){
 function reset(specific, desired) {
   var table;
   setProgressToZero();
-  if ((fail||finished) && !specific){
+  if ((hasFailed||hasFinished) && !specific){
     setHighScore();
   }
   mineList.length=0;
   amountList.length=0;
   flagged.length=0;
   visited.length=0;
-  finished = false;
-  fail = false;
+  hasFinished = false;
+  hasFailed = false;
   table = document.querySelector("#minefield");
   table.innerHTML = "";
-  timer = false;
+  isTimerOn = false;
 	hour = 0;
 	minute = 0;
 	second = 0;
@@ -396,13 +396,13 @@ function setSpecificToNull(){
 
 function setHighScore() {
   var classement, type, result;
-  erreur=width<4 ||height<4||nbOfMines>((height*width)-9)||nbOfMines<1;
+  hasError=width<4 ||height<4||nbOfMines>((height*width)-9)||nbOfMines<1;
   type=selected!==null ? selected : height.toString() + "_" + width.toString() + "_" + nbOfMines
-  if (erreur){
+  if (hasError){
     warning();
     return;
   }
-  if (!fail && finished){
+  if (!hasFailed && hasFinished){
     classement=JSON.parse(localStorage.getItem('classement'))||{};
 
     result=[hour+"h"+minute+"m"+second+"s", (hour/360)+(minute/60)+second];
@@ -496,10 +496,10 @@ height = 10;
 //sets the total number of mines on the field as an integer
 nbOfMines = 30;
 
-//fail and finished condition as boolean
-fail = false;
-finished = false;
-erreur = false;
+//hasFailed and hasFinished condition as boolean
+hasFailed = false;
+hasFinished = false;
+hasError = false;
 hour = 00;
 minute = 00;
 second = 00;
