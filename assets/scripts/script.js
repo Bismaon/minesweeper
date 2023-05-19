@@ -11,27 +11,22 @@ window.onload = function(){
 function stopWatch() {
 	if (isTimerOn) {
 		count++;
-
 		if (count == 100) {
 			second++;
 			count = 0;
 		}
-
 		if (second == 60) {
 			minute++;
 			second = 0;
 		}
-
 		if (minute == 60) {
 			hour++;
 			minute = 0;
 			second = 0;
 		}
-
 		let hrString = hour;
 		let minString = minute;
 		let secString = second;
-
 		if (hour < 10) {
 			hrString = "0" + hrString;
 		}
@@ -51,11 +46,17 @@ function stopWatch() {
 	}
 }
 
-//clic takes as parameters two integer, width and height, and a boolean, if
-//the shift key has been pressed or not. It checks which tile has been pressed
-//and reacts accordingly. It returns nothing
+function init() {
+  // sets the empty minefield
+  setEmptyMinefield();
+}
+
+// clic takes as parameters two integer, width and height, and a boolean, if
+// the shift key has been pressed or not. It checks which tile has been pressed
+// and reacts accordingly. It returns nothing
 function clic(row, column, event) {
-  if (hasFailed || hasFinished || hasError) {
+  if (hasFailed || hasFinished || hasError()) {
+    alert("Perdu!");
     return;
   }
   // checks if it the first tile pressed
@@ -71,42 +72,35 @@ function clic(row, column, event) {
     progress();
 
   }
-  //checks if the player has failed if so a message is shown saying "Perdu!"
-  else if (hasFailed) {
-    isTimerOn = false;
-    alert("Perdu!");
-  }
   //if the tile has not been visited
-  else if (!(find(visited,[row, column])!=-1)) {
+  else if (!(find(visited,[row, column])!==-1)) {
     //if the shift key is pressed, it flags the tile accordingly
-    if (event.shiftKey||event.button==2) {
+    if (event.shiftKey||event.button===2) {
       flagTile(row, column);
     }
 
     //else it shows the tile that the player has clicked on
     else {
       showTile(row, column);
-      progress();
     }
 
     //if the player has not clicked on a mine it checks if the player has
     //clicked on all none-mine tile, if so shows all the tiles and a
     //message saying "Gagné!"
     if (!hasFailed) {
-      if (checkFinish()) {
+      if (isFinished()) {
         isTimerOn=false
         displayAll();
         alert("Gagn\u00e9!");
-        progress();
       }
-    }
-    //if the player has clicked on a mine it shows a message saying
-    //"Perdu!" and display all the mines
-    else {
+    } else {
+      //if the player has clicked on a mine it shows a message saying
+      //"Perdu!" and display all the mines
       isTimerOn=false
       displayMines();
       alert("Perdu!");
     }
+    progress();
   }
 }
 
@@ -116,7 +110,7 @@ function setEmptyMinefield() {
   var currentRow, rowHTML, table;
   //stores the field as table
   table = document.querySelector("#minefield");
-
+  table.innerHTML = "";
   for (var row = 0; row < height; row += 1) {
     //stores the id of the row as line+row
     currentRow = "line" + row.toString();
@@ -150,7 +144,7 @@ function setMineList(rows, columns) {
   //for each value in tempMineList add it to the list of list of integers
   //that is mineList
   for (var i = 0; i < tempMineList.length; i += 1) {
-    if (Number.parseInt(i / width) > row) {
+    if (Math.floor(i / width) > row) {
       row += 1;
       mineList.push([]);
     }
@@ -159,7 +153,9 @@ function setMineList(rows, columns) {
   }
 }
 
-const mul = (arr, times) => Array.from({length: times*arr.length}, (_,i) => arr[i%arr.length]);
+// mul multiplies an array by a number like in python e.g. [1]*3=[1, 1, 1]
+const mul = (arr, times) => Array.from({length: times*arr.length}, 
+                                        (_,i) => arr[i%arr.length]);
 
 //FYShuffle takes as parameters two list of integers, coordinates were mines
 //cannot be put. Shuffles the mines in the list and returns the shuffled list.
@@ -175,7 +171,7 @@ function FYShuffle(rows, columns) {
     jRow = Math.floor(j / width);
     iColumn = i % width;
     jColumn = j % width;
-    //checks that no mine end in the 8 tiles surrounding the user clicked tile
+    //checks that no mine ends in the 8 tiles surrounding the user clicked tile
     if (rows.includes(iRow) && columns.includes(iColumn)) {
       while (tempMineList[j]===1 || (rows.includes(jRow) && columns.includes(jColumn))){
         j = j < (width * height) - 2 ? j + 1 : 0;
@@ -251,15 +247,12 @@ function displayMines() {
       //if the current coordinates corresponds to the location of a mine
       //and haven't been already visited or flagged it shows on the
       //minefield the mine
-      if (mineList[row][column] === 1 && !((find(visited, [row, column])!=-1) || (find(flagged, [row, column])!=-1))) {
-        //gets the tile from the HTML code and changes the images it
-        //stores
-        tile = document.querySelector("#tile" + row.toString() + "_" + column.toString());
+      tile = document.querySelector("#tile" + row.toString() + "_" + column.toString());
+      if (mineList[row][column] === 1 && ((find(visited, [row, column])===-1) && find(flagged,[row, column])===-1)){
+        // gets the tile from the HTML code and changes the images it stores
         tile.innerHTML = tileList[9];
-      } else if (mineList[row][column] === 0 && (find(flagged,[row, column])!=-1)) {
-        //gets the tile from the HTML code and changes the images it
-        //stores
-        tile = document.querySelector("#tile" + row.toString() + "_" + column.toString());
+      } else if (mineList[row][column] === 0 && (find(flagged,[row, column])!==-1)) {
+        // gets the tile from the HTML code and changes the images it stores
         tile.innerHTML = tileList[13];
       }
     }
@@ -276,61 +269,57 @@ function showBlank(row, column) {
   xrange = [column - 1, column, column + 1];
   yrange = [row - 1, row, row + 1];
 
-  //If the tile hasn't been visited it adds its coordinates to visited and
-  //checks for other surrounding tiles
-  if ((find(visited, [row, column])===-1)) {
-    //Mark the tile visited
-    visited.push([row, column]);
-
-    //If the tile is blank then adjust the HTML code of the tile
-    if (amountList[row][column] === 0) {
-      //Display it to the user
-      tile = document.querySelector("#tile" + row.toString() + "_" + column.toString());
-      tile.innerHTML = tileList[0];
-
-      // if the coordinate are impossible they are removed from the xrange and
-      // yrange array
-      if (row-1===-1){
-        yrange.shift();
-      }
-      if (row+1===height){
-        yrange.pop()
-      }
-      if (column-1===-1){
-        xrange.shift()
-      }
-      if (column+1===width){
-        xrange.pop()
-      }
-
-      for (var row1, j = 0; j < yrange.length; j += 1){
-        row1=yrange[j];
-        for (var column1, i=0; i<xrange.length;i+=1){
-          column1=xrange[i];
-          //if column1 and row1 corresponds to the cell whose surrounding are being checked it skips the value
-          if (column1===column && row1===row){
-            continue;
-          }
-          //if the coordinates of the tile corresponds to another
-          //blank tile it calls back showBlank with new coordinates
-          else if (amountList[row1][column1]===0){
-            showBlank(row1, column1)
-          }
-          //if the coordinates of the tile corresponds to a list =
-          //containing a number, amount of mines surround it, it
-          //adjust the HTML code of the tile
-          else if (!(find(visited, [row1, column1])!=-1)){
-            showTile(row1, column1);
-          }
-        }
-      }
-    } else {
-      return;
-    }
-  } else {
+  // checks that the tile has not been visited
+  if ((find(visited, [row, column])!=-1)){
     return;
   }
+  //Mark the tile as visited
+  visited.push([row, column]);
+
+  tile = document.querySelector("#tile" + row.toString() + "_" + column.toString());
+  tile.innerHTML = tileList[0];
+
+  // if the coordinate are impossible they are removed from the xrange and
+  // yrange array
+  if (row-1===-1){
+    yrange.shift();
+  }
+  if (row+1===height){
+    yrange.pop();
+  }
+  if (column-1===-1){
+    xrange.shift();
+  }
+  if (column+1===width){
+    xrange.pop();
+  }
+
+  for (var row1, j = 0; j < yrange.length; j += 1){
+    row1=yrange[j];
+    for (var column1, i=0; i<xrange.length;i+=1){
+      column1=xrange[i];
+      // if column1 and row1 corresponds to the cell whose surrounding are being
+      // checked it skips the value
+      if (column1===column && row1===row){
+        continue;
+      }
+      // if the coordinates of the tile corresponds to another blank tile it
+      // calls back showBlank with new coordinates
+      else if (amountList[row1][column1]===0){
+        showBlank(row1, column1)
+      }
+      // if the coordinates of the tile corresponds to a list = containing a
+      // number, amount of mines surround it, it adjust the HTML code of the
+      // tile
+      else if (!(find(visited, [row1, column1])!=-1)){
+        showTile(row1, column1);
+      }
+    }
+  }
 }
+
+
+
 
 // compare takes an array of arrays (haystack) and an array, and returns True
 // if the array is pressent in the haystack
@@ -353,13 +342,14 @@ function showTile(row, column) {
   var tile, amount;
   amount=amountList[row][column];
   tile = document.querySelector("#tile" + row.toString() + "_" + column.toString());
-  //if the coordinates of the tile represent one that has been flagged or visited, it exits showTile
-  if (find(flagged,[row, column])!=-1 || find(visited,[row, column])!=-1) {
+  //if the coordinates of the tile represent one that has been flagged or
+  // visited, it exits showTile
+  if (find(flagged,[row, column])!==-1 || find(visited,[row, column])!==-1) {
     return;
   }
   //if the coordinates of the tile represent one that is a a mine, it
   //displays the mine to the user and sets the condition of hasFailed as True
-  else if (mineList[row][column] === 1) {
+  if (mineList[row][column] === 1) {
     visited.push([row, column]);
     //Display it to the user
     tile.innerHTML = tileList[12];
@@ -369,7 +359,7 @@ function showTile(row, column) {
   }
   //if the coordinates of the tile, show a blank tile it calls showBlank with
   //its coordinates.
-  else if (amount === 0) {
+  if (amount === 0) {
     showBlank(row, column);
     return;
   } else {
@@ -404,17 +394,17 @@ function flagTile(row, column) {
   }
 }
 
-//checkFinish takes no parameters and checks if all the non-mine tiles have
+//isFinished takes no parameters and checks if all the non-mine tiles have
 //been visited and returns a boolean accordingly
 
-function checkFinish() {
+function isFinished() {
   var emptyTiles;
   //gets the number of non-mine tiles
   emptyTiles = (height * width) - nbOfMines;
 
   //if the number of visited tiles does not corresponds to the number of
   //empty tiles returns False
-  if (visited.length != emptyTiles) {
+  if (visited.length !== emptyTiles) {
     return false;
   }
   //else it checks for all the visited tiles if they cooresponds to non-mine
@@ -426,7 +416,6 @@ function checkFinish() {
       return false;
     }
   }
-
   hasFinished = true;
   return hasFinished;
 }
@@ -454,27 +443,34 @@ function specificGrid(row, column, mines, desiredTable){
   height=row;
   width=column;
   nbOfMines=mines;
-  if (nbOfMines==10){
-    selected="débutant";
-  }  else if (nbOfMines==40){
-    selected="intermédiaire";
-  }  else{
-    selected="expert";
+  switch (nbOfMines){
+    case 10:
+      selected="débutant";
+      break;
+    case 40:
+      selected="intermédiaire";
+      break;
+    default:
+      selected="expert";
   }
   desired=[desiredTable, height, width, nbOfMines]
-  reset(true, desired);
+  reset(true,desired);
 }
 
 function warning(){
   alert("Les paramètres de votre démineur sont incorrects veuillez les vérifier pour pouvoir jouer.")
 }
 
-// resets the board, change the minefield size and amount of mines based on the
-// user's settings, as well as sets the highscores.
+/**
+ * resets the board, change the minefield size and amount of mines based on the
+ * user's settings, as well as sets the highscores.
+ * @param {Boolean} specific 
+ * @param {Array} desired 
+ */
 function reset(specific, desired) {
   var table;
   setProgressToZero();
-  if ((hasFailed||hasFinished) && !specific){
+  if ((hasFailed||hasFinished) && !(desired!==null)){
     setHighScore();
   }
   mineList.length=0;
@@ -484,7 +480,6 @@ function reset(specific, desired) {
   hasFinished = false;
   hasFailed = false;
   table = document.querySelector("#minefield");
-  table.innerHTML = "";
   isTimerOn = false;
 	hour = 0;
 	minute = 0;
@@ -493,25 +488,26 @@ function reset(specific, desired) {
 	document.getElementById('min').innerHTML = "00";
 	document.getElementById('sec').innerHTML = "00";
   
-  if (!specific && selected===null){
-    height = Number.parseInt(document.querySelector("#height").value);
-    width=Number.parseInt(document.querySelector("#width").value);
-    nbOfMines=Number.parseInt(document.querySelector("#mines").value);
-    document.getElementById("quantity").innerHTML=nbOfMines.toString();
-    selected=null;
-    showHighScore();
+  if (!(desired!==null)){
+    if(selected===null){
+      height = Number.parseInt(document.querySelector("#height").value);
+      width = Number.parseInt(document.querySelector("#width").value);
+      nbOfMines = Number.parseInt(document.querySelector("#mines").value);
+      if (hasError()){
+        warning();
+        return;
+      }
+      document.getElementById("quantity").innerHTML=nbOfMines.toString();
+      selected = null;
+      showHighScore();
+    }
     setEmptyMinefield();
-  } else if (selected!==null  && !specific){
-    
-    setEmptyMinefield();
-
   } else {
     document.querySelector("#height").value=desired[1];
     document.querySelector("#width").value=desired[2];
     document.querySelector("#mines").value=desired[3];
     document.getElementById("quantity").innerHTML=desired[3].toString();
-    table=document.querySelector("#minefield")
-    table.innerHTML=""
+
     table.innerHTML=desired[0];
     showHighScore();
   }
@@ -519,14 +515,16 @@ function reset(specific, desired) {
 
 function setSpecificToNull(){
   selected=null;
-  return;
+}
+
+function hasError(){
+  return width<4 ||height<4||nbOfMines>((height*width)-9)||nbOfMines<1;
 }
 
 function setHighScore() {
   var classement, type, result;
-  hasError=width<4 ||height<4||nbOfMines>((height*width)-9)||nbOfMines<1;
   type=selected!==null ? selected : height.toString() + "_" + width.toString() + "_" + nbOfMines
-  if (hasError){
+  if (hasError()){
     warning();
     return;
   }
@@ -551,40 +549,39 @@ function setHighScore() {
 }
 
 function setProgressToZero(){
-  var elem;
-  elem=document.getElementById("myBar");
-  elem.style.width = "0%";
-  elem.innerHTML = "0%";
+  var progressBar;
+  progressBar=document.getElementById("myBar");
+  progressBar.style.width = "0%";
+  progressBar.innerHTML = "0%";
 }
+
 function showHighScore(){
   var classementTitle, classementHTML, classement, type;
-  type=selected!==null ? selected : height.toString() + "_" + width.toString() + "_" + nbOfMines
+  type=selected!==null ? selected : height.toString() + "x" + width.toString() + " " + nbOfMines + " mines"
+
   classement=JSON.parse(localStorage.getItem('classement'))||{};
   classementTitle=document.querySelector("#classement-title");
-  if (!["débutant", "intermédiaire", "expert"].includes(selected)){
-    classementTitle.innerHTML = "Classement pour " + height.toString() + "x" + width.toString() + " " + nbOfMines + " mines";
-  }
-  else{
-    classementTitle.innerHTML = "Classement " + selected;
-  }
-  
   classementHTML=document.querySelector("#classement");
   classementHTML.innerHTML="";
+  classementTitle.innerHTML = "Classement " + type;
+
   if (classement[type] === undefined){
     return;
   }
+  
   for (var i=0; i<classement[type].length; i+=1){
     classementHTML.innerHTML=classementHTML.innerHTML+"<li>"+classement[type][i][0]+"</li>"
   }
 }
+
 function progress() {
-  var elem, done;
-  
-  elem=document.getElementById("myBar");
-  done=Math.floor((visited.length/((height*width)-nbOfMines))*100);
-  elem.style.width = done + "%";
-  elem.innerHTML = done + "%";
+  var progressBar, progressed;
+  progressBar=document.getElementById("myBar");
+  progressed=Math.floor((visited.length/((height*width)-nbOfMines))*100);
+  progressBar.style.width = progressed + "%";
+  progressBar.innerHTML = progressed + "%";
 }
+
 //                           global values
 
 //stores the field with 1 given for location of a mine and 0 for a non-mine
@@ -629,7 +626,6 @@ nbOfMines = 30;
 //hasFailed and hasFinished condition as boolean
 hasFailed = false;
 hasFinished = false;
-hasError = false;
 hour = 00;
 minute = 00;
 second = 00;
